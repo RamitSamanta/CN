@@ -1,0 +1,220 @@
+3C) Write a Java Program  for valid or Invalid website.
+
+import java.net.*;
+import java.util.*;
+import java.io.*;
+import java.net.InetAddress;
+public class server{
+   public static void main(String args[])throws UnknownHostException{
+      try{
+            InetAddress add=InetAddress.getByName("www.abcd.com");
+            if(add.isReachable(5000))
+              {
+                 System.out.println("The ip is reachable:"+add);
+               }
+            
+         }
+       catch(Exception e)
+         {
+           System.out.println("Exception Found:"+e.getMessage());
+         }
+        
+      }
+}
+
+
+
+4) Implementation of TCP Client /Server Socket.
+Client Side:
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.Scanner;
+public class client{
+    public static void main(String args[])
+    {
+        Scanner sc=new Scanner(System.in);
+        String str;
+        try{
+            Socket s=new Socket("localhost",7999);
+            DataOutputStream dout=new DataOutputStream(s.getOutputStream());
+            do{
+                System.out.println("Enter the message");
+                str=sc.nextLine();
+                dout.writeUTF(str);
+                dout.flush();
+            }while(!str.equals("quit"));
+            dout.close();
+            s.close();
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+Server side:
+import java.io.*;
+import java.util.*;
+import java.net.*;
+import java.util.Scanner;
+public class server{
+    public static void main(String args[])
+    {
+        String str;
+        try{
+            ServerSocket ss=new ServerSocket(7999);
+            Socket s=ss.accept();
+            do
+            {
+                DataInputStream dis=new DataInputStream(s.getInputStream());
+                str=(String)dis.readUTF();
+                System.out.println("message="+str);
+            }while(!str.equals("quit"));
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+5) Implementation of UDP Client/Server Socket.
+Client Side-
+	import java.io.*;
+	import java.util.*;
+	import java.io.*;
+
+	public class UDP_Client {
+	    public static void main(String[] args) {
+	        DatagramSocket ds = new DatagramSocket();
+	        Scanner sc = new Scanner(System.in);
+	        System.out.println("which integer will you like to give");
+	        int i = sc.nextInt();
+	        byte b[] = String.valueOf(i).getBytes();
+	        InetAddress ip = InetAddress.getLocalHost();
+	        DatagramPacket dp1 = new DatagramPacket(data, data.length);
+	        ds.receive(dp1);
+	        String str = new String(dp1.getData());
+	        System.out.println("Number " +str);
+	    }    
+	}
+
+Server side-
+
+	import java.util.*;
+	import java.net.*;
+	import java.io.*;
+
+	public class UDP_Server {
+	    public static void main(String[] args) {
+	        DatagramSocket ds = new DatagramSocket(1889);
+	        byte data[] = new byte[1024];
+	        DatagramPacket dp = new DatagramPacket(data, data.length);
+	        ds.receive(dp);
+	        String str = new String(dp.getData());
+	        System.out.println("Value received " +str);
+	        int num = Integer.parseInt(str.trim());
+	        int res = num*num;
+	        byte b[] = String.valueOf(res).getBytes();
+	        InetAddress ip = InetAddress.getLocalHost();
+	        DatagramPacket dp1 = new DatagramPacket(b, b.length, ip, dp.getPort());
+	        ds.send(dp1);
+	    }    
+	}
+
+6) Implementation of Stop- Wait Mechanism
+Client Side:
+	import java.util.*;
+	import java.io.*;
+	Import java.net.*;
+
+	public class StopAndWait_Client {
+	    public static void main(String[] args) {
+	        Socket socket = new Socket("localhost", 4999);
+	        Scanner in = new Scanner(System.in);
+	        System.out.println("Enter the number of frame to be sent");
+	        int n = in.nextInt();
+	        for(int i = 1; i <= n+1;){
+	            PrintWriter pwrt = new PrintWriter(socket.getOutputStream());
+	            if(i == n+1){
+	                pwrt.println("exit");
+	                pwrt.flush();
+	                break;
+	            }
+	            System.out.println("Frame " +i +" sent");
+	            pwrt.println(i);
+	            pwrt.flush();
+	            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	            String str = br.readLine();
+	            if(str!=null){
+	                System.out.println("Acknowledgement received");
+	                i++;
+	                Thread.sleep(400);
+	            }
+	            else{
+	                pwrt.println(i);
+	            }
+	        }
+	    }    
+	}
+
+Server side:
+	import java.util.*;
+	import java.io.*;
+	Import java.net.*;
+
+	public class StopAndWait_Server {
+	    public static void main(String[] args) {
+	        String ext = "exit";
+	        ServerSocket ss = new ServerSocket(4999);
+	        Socket socket = ss.accept();
+	        String str = "k1";
+	        while(str.compareTo("exit")!=0){
+	            Thread.sleep(400);
+	            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	            str = br.readLine();
+	            if(str.compareTo(ext) == 0){
+	            break;
+	            }
+	            System.out.println("Frame " +str +"received.");
+	            PrintWriter pw = new PrintWriter(socket.getOutputStream());
+	            pw.println("Received");
+	            pw.flush();
+	        }
+	        System.out.println("All frames received");
+	    }    
+	}
+7) Multicast Socket:
+Client side:
+	import java.net.*;
+
+	//Code for Java 13 or older
+	public class MulticastClient {
+	    public static void main(String[] args) throws Exception {
+	        InetAddress group = InetAddress.getByName("225.2.2.2");
+	        MulticastSocket ms = new MulticastSocket(2300);
+	        ms.joinGroup(group);
+	        byte[] data = new byte[1024];
+	        DatagramPacket packet = new DatagramPacket(data, data.length);
+	        ms.receive(packet);
+	        System.out.println(new String(data));
+	        ms.close();
+	        System.out.println("Socket Closed");
+	    }
+	}
+Socket closed Server side:
+	import java.net.*;
+
+	public class MulticastSender {
+	    public static void main(String[] args) throws Exception {
+	        InetAddress group = InetAddress.getByName("225.2.2.2");
+	        MulticastSocket ms = new MulticastSocket();
+	        String msg = "UDP Multicasting";
+	        DatagramPacket packet = new DatagramPacket(msg.getBytes(), msg.length(), group, 2300);
+	        ms.send(packet);
+	        ms.close();
+	
+
+	    }
+	}
+
